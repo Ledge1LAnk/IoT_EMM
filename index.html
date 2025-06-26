@@ -469,9 +469,9 @@
       <div class="chart-header">
         <h3 class="chart-title">Historical Energy Usage</h3>
         <div class="time-range-selector" id="energy-range">
-          <button class="time-range-btn active" data-range="24">1 Min</button>
-          <button class="time-range-btn" data-range="168">5 Mins</button>
-          <button class="time-range-btn" data-range="672">1 Hour</button>
+          <button class="time-range-btn active" data-range="24">Last 24h</button>
+          <button class="time-range-btn" data-range="168">Last 7d</button>
+          <button class="time-range-btn" data-range="672">Last 4w</button>
         </div>
       </div>
       <div class="chart-container"><canvas id="energyChart"></canvas></div>
@@ -516,14 +516,14 @@ Home Energy Monitoring and Management System
     // Data storage for charts
     let allPowerData = [];
     let allEnergyData = [];
-    const currentTimeRange = 1; // ~70 days (for test)
-    let currentEnergyRange = 1; // hours for energy chart
+    const currentPowerRange = 1; // 1 minute for power chart
+    let currentEnergyRange = 1; // minutes for energy chart (default to 1 min)
     
-    // Initialize charts
+// Initialize charts
     const powerCtx = document.getElementById("powerChart").getContext("2d");
     const energyCtx = document.getElementById("energyChart").getContext("2d");
     
-    // Power Chart - Fixed to 1 hour
+    // Power Chart - Fixed to 1 minute
     const powerChart = new Chart(powerCtx, {
       type: 'line',
       data: {
@@ -550,9 +550,9 @@ Home Energy Monitoring and Management System
           x: {
             type: 'time',
             time: {
-              unit: 'minute',
+              unit: 'second',
               displayFormats: {
-                minute: 'HH:mm'
+                second: 'HH:mm:ss'
               }
             },
             grid: {
@@ -657,6 +657,12 @@ Home Energy Monitoring and Management System
         scales: {
           x: {
             type: 'time',
+            time: {
+              unit: 'minute',
+              displayFormats: {
+                minute: 'HH:mm'
+              }
+            },
             grid: {
               color: 'rgba(255, 255, 255, 0.1)'
             },
@@ -730,10 +736,10 @@ Home Energy Monitoring and Management System
       }
     });
     
-    // Update power chart with fixed 1-hour time range
+    // Update power chart with fixed 1-minute time range
     function updatePowerChart() {
       const now = Date.now();
-      const maxAge = currentTimeRange * 1000; // Convert to milliseconds (1 hour)
+      const maxAge = currentPowerRange * 60 * 1000; // Convert to milliseconds (1 minute)
       
       // Filter data based on fixed time range
       const filteredData = allPowerData.filter(point => now - point.x <= maxAge);
@@ -746,7 +752,7 @@ Home Energy Monitoring and Management System
     // Update energy chart with time filter
     function updateEnergyChart() {
       const now = Date.now();
-      const maxAge = currentEnergyRange 60 * 1000; // Convert to milliseconds
+      const maxAge = currentEnergyRange * 60 * 1000; // Convert to milliseconds (minutes)
       
       // Filter data based on current time range
       const filteredData = allEnergyData.filter(point => now - point.x <= maxAge);
@@ -756,7 +762,7 @@ Home Energy Monitoring and Management System
       energyChart.update();
     }
     
-    // Time range selectors for energy chart (removed Last 12m)
+    // Time range selectors for energy chart - changed to 1min, 5min, 1hour
     document.querySelectorAll('#energy-range .time-range-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('#energy-range .time-range-btn').forEach(b => b.classList.remove('active'));
@@ -797,7 +803,18 @@ Home Energy Monitoring and Management System
       }
     });
 
+    // Update the energy range buttons in the HTML (change their labels and data-range values)
+    const energyRangeButtons = document.querySelectorAll('#energy-range .time-range-btn');
+    energyRangeButtons[0].textContent = 'Last 1m';
+    energyRangeButtons[0].dataset.range = '1';
+    energyRangeButtons[1].textContent = 'Last 5m';
+    energyRangeButtons[1].dataset.range = '5';
+    energyRangeButtons[2].textContent = 'Last 1h';
+    energyRangeButtons[2].dataset.range = '60';
 
+    const relayLabels = ["Living Room Light", "Bedroom Light", "Security Light", "Power Outlet 1", "Power Outlet 2", "Power Outlet 3", "Main Power"];
+    const relayControls = document.getElementById("relayControls");
+    
     // Create icons array matching labels
     const relayIcons = ["💡", "💡", "💡", "🔌", "🔌", "🔌", "⚡"];
 
