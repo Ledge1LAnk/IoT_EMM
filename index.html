@@ -469,9 +469,9 @@
       <div class="chart-header">
         <h3 class="chart-title">Historical Energy Usage</h3>
         <div class="time-range-selector" id="energy-range">
-          <button class="time-range-btn active" data-range="24">Last 24h</button>
-          <button class="time-range-btn" data-range="168">Last 7d</button>
-          <button class="time-range-btn" data-range="672">Last 4w</button>
+          <button class="time-range-btn active" data-range="24">1 Min</button>
+          <button class="time-range-btn" data-range="168">5 Mins</button>
+          <button class="time-range-btn" data-range="672">1 Hour</button>
         </div>
       </div>
       <div class="chart-container"><canvas id="energyChart"></canvas></div>
@@ -516,8 +516,8 @@ Home Energy Monitoring and Management System
     // Data storage for charts
     let allPowerData = [];
     let allEnergyData = [];
-    const currentTimeRange = 100000; // ~70 days (for test)
-    let currentEnergyRange = 100000; // hours for energy chart
+    const currentTimeRange = 1; // ~70 days (for test)
+    let currentEnergyRange = 1; // hours for energy chart
     
     // Initialize charts
     const powerCtx = document.getElementById("powerChart").getContext("2d");
@@ -733,7 +733,7 @@ Home Energy Monitoring and Management System
     // Update power chart with fixed 1-hour time range
     function updatePowerChart() {
       const now = Date.now();
-      const maxAge = currentTimeRange * 60 * 1000; // Convert to milliseconds (1 hour)
+      const maxAge = currentTimeRange * 1000; // Convert to milliseconds (1 hour)
       
       // Filter data based on fixed time range
       const filteredData = allPowerData.filter(point => now - point.x <= maxAge);
@@ -746,7 +746,7 @@ Home Energy Monitoring and Management System
     // Update energy chart with time filter
     function updateEnergyChart() {
       const now = Date.now();
-      const maxAge = currentEnergyRange * 60 * 60 * 1000; // Convert to milliseconds
+      const maxAge = currentEnergyRange 60 * 1000; // Convert to milliseconds
       
       // Filter data based on current time range
       const filteredData = allEnergyData.filter(point => now - point.x <= maxAge);
@@ -797,9 +797,7 @@ Home Energy Monitoring and Management System
       }
     });
 
-    const relayLabels = ["Living Room Light", "Bedroom Light", "Security Light", "Power Outlet 1", "Power Outlet 2", "Power Outlet 3", "Main Power"];
-    const relayControls = document.getElementById("relayControls");
-    
+
     // Create icons array matching labels
     const relayIcons = ["💡", "💡", "💡", "🔌", "🔌", "🔌", "⚡"];
 
