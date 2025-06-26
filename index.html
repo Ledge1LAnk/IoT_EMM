@@ -516,14 +516,14 @@ Home Energy Monitoring and Management System
     // Data storage for charts
     let allPowerData = [];
     let allEnergyData = [];
-    const currentPowerRange = 1; // 1 minute for power chart
-    let currentEnergyRange = 1; // minutes for energy chart (default to 1 min)
+    const currentTimeRange = 1; // ~70 days (for test)
+    let currentEnergyRange = 100000; // hours for energy chart
     
-// Initialize charts
+    // Initialize charts
     const powerCtx = document.getElementById("powerChart").getContext("2d");
     const energyCtx = document.getElementById("energyChart").getContext("2d");
     
-    // Power Chart - Fixed to 1 minute
+    // Power Chart - Fixed to 1 hour
     const powerChart = new Chart(powerCtx, {
       type: 'line',
       data: {
@@ -550,9 +550,9 @@ Home Energy Monitoring and Management System
           x: {
             type: 'time',
             time: {
-              unit: 'second',
+              unit: 'minute',
               displayFormats: {
-                second: 'HH:mm:ss'
+                minute: 'HH:mm'
               }
             },
             grid: {
@@ -657,12 +657,6 @@ Home Energy Monitoring and Management System
         scales: {
           x: {
             type: 'time',
-            time: {
-              unit: 'minute',
-              displayFormats: {
-                minute: 'HH:mm'
-              }
-            },
             grid: {
               color: 'rgba(255, 255, 255, 0.1)'
             },
@@ -736,23 +730,30 @@ Home Energy Monitoring and Management System
       }
     });
     
-    // Update power chart with fixed 1-minute time range
+    // Update power chart with fixed 1-hour time range
     function updatePowerChart() {
       const now = Date.now();
-      const maxAge = currentPowerRange * 60 * 1000; // Convert to milliseconds (1 minute)
+      const maxAge = currentTimeRange * 60 * 1000; // Convert to milliseconds (1 hour)
       
       // Filter data based on fixed time range
       const filteredData = allPowerData.filter(point => now - point.x <= maxAge);
       
       // Update chart
       powerChart.data.datasets[0].data = filteredData;
+      powerChart.options.scales.x.time.unit = 'second'; // Show seconds for 1-minute range
+      powerChart.options.scales.x.time.displayFormats = {
+        second: 'HH:mm:ss'
+      };
+
+      powerChart.options.scales.x.ticks.maxTicksLimit = 6; // Show 6 ticks (every 10 seconds)
+      
       powerChart.update('none');
     }
     
     // Update energy chart with time filter
     function updateEnergyChart() {
       const now = Date.now();
-      const maxAge = currentEnergyRange * 60 * 1000; // Convert to milliseconds (minutes)
+      const maxAge = currentEnergyRange * 60 * 60 * 1000; // Convert to milliseconds
       
       // Filter data based on current time range
       const filteredData = allEnergyData.filter(point => now - point.x <= maxAge);
@@ -762,7 +763,7 @@ Home Energy Monitoring and Management System
       energyChart.update();
     }
     
-    // Time range selectors for energy chart - changed to 1min, 5min, 1hour
+    // Time range selectors for energy chart (removed Last 12m)
     document.querySelectorAll('#energy-range .time-range-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('#energy-range .time-range-btn').forEach(b => b.classList.remove('active'));
@@ -802,15 +803,6 @@ Home Energy Monitoring and Management System
         updateEnergyChart();
       }
     });
-
-    // Update the energy range buttons in the HTML (change their labels and data-range values)
-    const energyRangeButtons = document.querySelectorAll('#energy-range .time-range-btn');
-    energyRangeButtons[0].textContent = 'Last 1m';
-    energyRangeButtons[0].dataset.range = '1';
-    energyRangeButtons[1].textContent = 'Last 5m';
-    energyRangeButtons[1].dataset.range = '5';
-    energyRangeButtons[2].textContent = 'Last 1h';
-    energyRangeButtons[2].dataset.range = '60';
 
     const relayLabels = ["Living Room Light", "Bedroom Light", "Security Light", "Power Outlet 1", "Power Outlet 2", "Power Outlet 3", "Main Power"];
     const relayControls = document.getElementById("relayControls");
